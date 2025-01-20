@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Font Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .font-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .font-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .font-info {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .font-name {
+            font-weight: bold;
+            color: #444;
+        }
+        
+        .font-score {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .font-example {
+            font-size: 1.2em;
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+        
+        .error {
+            color: red;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Font Display Gallery</h1>
+    <div class="font-container">
+        <script>
+            async function loadFonts() {
+                try {
+                    const response = await fetch('font-data.json');
+                    const data = await response.json();
+                    const container = document.querySelector('.font-container');
+                    
+                    data.fonts.forEach(result => {
+                        const fontPath = result.font.replace('\\', '/');
+                        const fontName = result.font.split('\\').pop().replace('.ttf', '');
+                        
+                        const fontCard = document.createElement('div');
+                        fontCard.className = 'font-card';
+                        
+                        const fontStyle = document.createElement('style');
+                        fontStyle.textContent = `
+                            @font-face {
+                                font-family: "${fontName}";
+                                src: url("https://git.linuxholic.com/boydaihungst/vietnamese-font/raw/branch/master/${fontPath}") format("truetype");
+                            }
+                        `;
+                        document.head.appendChild(fontStyle);
+                        
+                        fontCard.innerHTML = `
+                            <div class="font-info">
+                                <div class="font-name">${fontName}</div>
+                                <div class="font-score">Score: ${result.score}</div>
+                            </div>
+                            <div class="font-example" style="font-family: '${fontName}'">
+                                The quick brown fox jumps over the lazy dog
+                                <br>
+                                ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                                <br>
+                                abcdefghijklmnopqrstuvwxyz
+                                <br>
+                                0123456789
+                            </div>
+                        `;
+                        
+                        container.appendChild(fontCard);
+                    });
+                } catch (error) {
+                    const container = document.querySelector('.font-container');
+                    container.innerHTML = `
+                        <div class="error">
+                            Error loading font data. Please make sure font-data.json is in the same directory as this HTML file.
+                        </div>
+                    `;
+                    console.error('Error loading font data:', error);
+                }
+            }
+            
+            loadFonts();
+        </script>
+    </div>
+</body>
+</html>
