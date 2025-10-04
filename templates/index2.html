@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Font Finder App</title>
+    <style>
+   * { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; } .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; } .header { background: linear-gradient(135deg, #ff6b6b, #feca57); color: white; text-align: center; padding: 30px; } .header h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); } .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 30px; } .section { background: #f8f9fa; border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); } .section h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.5rem; border-bottom: 3px solid #3498db; padding-bottom: 10px; } .upload-section { grid-column: 1 / -1; margin-bottom: 20px; } .upload-area { border: 3px dashed #3498db; border-radius: 15px; padding: 40px; text-align: center; background: #f8f9fa; transition: all 0.3s ease; } .upload-area.dragover { background: #e3f2fd; border-color: #1976d2; } .upload-area input[type="file"] { display: none; } .upload-btn { background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.1rem; margin: 10px; transition: all 0.3s ease; } .upload-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4); } .threshold-control { margin-top: 20px; text-align: center; } .threshold-control label { display: block; margin-bottom: 10px; font-weight: 600; color: #2c3e50; } .threshold-control input[type="range"] { width: 200px; margin: 0 10px; } .tab-container { margin-bottom: 20px; } .tab-buttons { display: flex; border-bottom: 2px solid #e9ecef; margin-bottom: 20px; } .tab-button { flex: 1; padding: 15px 20px; border: none; background: transparent; color: #6c757d; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border-bottom: 3px solid transparent; } .tab-button.active { color: #3498db; border-bottom-color: #3498db; background: rgba(52, 152, 219, 0.05); } .tab-button:hover { color: #3498db; background: rgba(52, 152, 219, 0.05); } .tab-content { display: none; } .tab-content.active { display: block; } .image-container { position: relative; margin-bottom: 20px; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); } .processed-image { width: 100%; height: auto; cursor: crosshair; transition: all 0.3s ease; } .processed-image:hover { transform: scale(1.02); } .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; letter-spacing: 0.5px; } .btn-success { background: linear-gradient(135deg, #27ae60, #229954); color: white; } .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4); } .character-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); } .character-table th, .character-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; } .character-table th { background: linear-gradient(135deg, #34495e, #2c3e50); color: white; font-weight: 600; letter-spacing: 0.5px; } .character-table tr:hover { background-color: #f8f9fa; transform: scale(1.01); transition: all 0.3s ease; } .character-table input { padding: 8px 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; width: 60px; text-align: center; transition: all 0.3s ease; } .character-table input:focus { outline: none; border-color: #3498db; box-shadow: 0 0 10px rgba(52, 152, 219, 0.3); } .delete-btn { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; transition: all 0.3s ease; } .delete-btn:hover { background: #c0392b; transform: scale(1.1); } .results-section { grid-column: 1 / -1; margin-top: 20px; } .font-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); gap: 20px; margin-top: 20px; } .font-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: all 0.3s ease; } .font-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); } .font-name { font-weight: 600; font-size: 1.2rem; color: #2c3e50; margin-bottom: 10px; } .font-image { min-height: 100px; background-repeat: no-repeat; background-size: contain; } .font-score { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px; } .loading { display: none; text-align: center; padding: 20px; } .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } .error { color: #e74c3c; background: #fdf2f2; border: 1px solid #fecaca; padding: 15px; border-radius: 8px; margin-bottom: 20px; } .success { color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 15px; border-radius: 8px; margin-bottom: 20px; } .image-processing-section { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔤 Font Finder</h1>
+            <p>Upload an image and click on characters to find matching fonts</p>
+        </div>
+        
+        <!-- Upload Section -->
+        <div class="section upload-section" id="uploadSection">
+            <h2>📁 Upload Image</h2>
+            <div class="upload-area" id="uploadArea">
+                <p>📸 Drag and drop an image here or click to browse</p>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Choose Image File
+                </button>
+                <input type="file" id="fileInput" accept="image/*">
+                
+                <div class="threshold-control">
+                    <label for="thresholdSlider">Threshold: <span id="thresholdValue">100</span></label>
+                    <input type="range" id="thresholdSlider" min="50" max="200" value="100">
+                </div>
+            </div>
+            
+            <div class="loading" id="uploadLoading">
+                <div class="spinner"></div>
+                <p>Processing image...</p>
+            </div>
+        </div>
+        
+        <div class="main-content image-processing-section" id="imageProcessingSection">
+            <!-- Image Display Section -->
+            <div class="section">
+                <h2>📸 Processed Images</h2>
+                
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" onclick="switchTab('original')">Original</button>
+                        <button class="tab-button" onclick="switchTab('inverted')">Inverted</button>
+                    </div>
+                    
+                    <div id="originalTab" class="tab-content active">
+                        <div class="image-container">
+                            <img id="originalImage" 
+                                 class="processed-image" 
+                                 alt="Original Processed Image">
+                        </div>
+                    </div>
+                    
+                    <div id="invertedTab" class="tab-content">
+                        <div class="image-container">
+                            <img id="invertedImage" 
+                                 class="processed-image" 
+                                 alt="Inverted Processed Image">
+                        </div>
+                    </div>
+                </div>
+                
+                <p>Click on characters in the image to label them for font matching.</p>
+            </div>
+            
+            <!-- Character Labeling Section -->
+            <div class="section">
+                <h2>🏷️ Character Labeling</h2>
+                <p>Click on characters in the image to add them to the table, then enter the corresponding letter.</p>
+                
+                <table class="character-table" id="characterTable">
+                    <thead>
+                        <tr>
+                            <th>Label ID</th>
+                            <th>Letter</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="characterTableBody">
+                    </tbody>
+                </table>
+                
+                <button type="button" id="findFontsBtn" class="btn btn-success" disabled>🔍 Find Matching Fonts</button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing characters and finding fonts...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="section results-section" id="resultsSection" style="display: none;">
+            <h2>🎯 Font Results</h2>
+            <div class="font-grid" id="fontGrid">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let characters = [];
+        let currentTab = 'original';
+        let imageData = null; // Store all processed image data
+        
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const thresholdSlider = document.getElementById('thresholdSlider');
+        const thresholdValue = document.getElementById('thresholdValue');
+        const originalImage = document.getElementById('originalImage');
+        const invertedImage = document.getElementById('invertedImage');
+        const characterTableBody = document.getElementById('characterTableBody');
+        const findFontsBtn = document.getElementById('findFontsBtn');
+// Upload handling
+        fileInput.addEventListener('change', handleFileUpload);
+        
+        // Threshold slider
+        thresholdSlider.addEventListener('input', (e) => {
+            thresholdValue.textContent = e.target.value;
+        });
+        
+        // Drag and drop on upload area
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                handleFileUpload({ target: { files: files } });
+            }
+        });
+
+        // Global drag and drop (anywhere on the page)
+        document.body.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        
+        document.body.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Only process if upload section is visible
+            if (document.getElementById('uploadSection').style.display !== 'none') {
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    handleFileUpload({ target: { files: files } });
+                }
+            }
+        });
+
+        // Paste from clipboard
+        document.addEventListener('paste', (e) => {
+            // Only process if upload section is visible
+            if (document.getElementById('uploadSection').style.display !== 'none') {
+                const items = e.clipboardData.items;
+                
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.startsWith('image/')) {
+                        e.preventDefault();
+                        const file = items[i].getAsFile();
+                        if (file) {
+                            handleFileUpload({ target: { files: [file] } });
+                        }
+                        break;
+                    }
+                }
+            }
+        });
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const threshold = parseInt(thresholdSlider.value);
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('threshold', threshold);
+            
+            document.getElementById('uploadLoading').style.display = 'block';
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('uploadLoading').style.display = 'none';
+                
+                if (data.success) {
+                    imageData = data;
+                    displayProcessedImages(data);
+                    document.getElementById('uploadSection').style.display = 'none';
+                    document.getElementById('imageProcessingSection').style.display = 'grid';
+                    showSuccess('Image processed successfully!');
+                } else {
+                    showError(data.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('uploadLoading').style.display = 'none';
+                showError('Upload failed: ' + error.message);
+            });
+        }
+
+        function displayProcessedImages(data) {
+            originalImage.src = data.processed_image;
+            invertedImage.src = data.processed_image_invert;
+            
+            // Reset character data
+            characters = [];
+            updateCharacterTable();
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            currentTab = tabName;
+        }
+
+        // Image click handlers
+        originalImage.addEventListener('click', (e) => {
+            handleImageClick(e, false);
+        });
+        
+        invertedImage.addEventListener('click', (e) => {
+            handleImageClick(e, true);
+        });
+
+        function handleImageClick(e, isInverted) {
+            if (!imageData) return;
+            
+            const img = e.target;
+            const rect = img.getBoundingClientRect();
+            const x = Math.round((e.clientX - rect.left) * (img.naturalWidth / rect.width));
+            const y = Math.round((e.clientY - rect.top) * (img.naturalHeight / rect.height));
+            
+            getLabelAtClick(x, y, isInverted);
+        }
+
+        function getLabelAtClick(x, y, isInverted) {
+            if (!imageData) return;
+            
+            const labelImage = isInverted ? imageData.label_image_invert : imageData.label_image;
+            
+            fetch('/get_label', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    x: x, 
+                    y: y,
+                    label_image: labelImage
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.label_id > 0) {
+                    // Check if this label already exists
+                    const existingChar = characters.find(c => c.label_id === data.label_id && c.isInverted === isInverted);
+                    if (!existingChar) {
+                        characters.push({
+                            label_id: data.label_id,
+                            letter: '',
+                            isInverted: isInverted
+                        });
+                        updateCharacterTable();
+                        findFontsBtn.disabled = characters.length === 0;
+                    }
+                }
+            })
+            .catch(error => {
+                showError('Failed to get label: ' + error.message);
+            });
+        }
+
+        // Find fonts button
+        findFontsBtn.addEventListener('click', () => {
+            findMatchingFonts();
+        });
+
+        function updateCharacterTable() {
+            characterTableBody.innerHTML = '';
+            
+            characters.forEach((char, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${char.label_id} ${char.isInverted ? '(Inverted)' : '(Original)'}</td>
+                    <td>
+                        <input type="text" 
+                               value="${char.letter}" 
+                               maxlength="1" 
+                               onchange="updateCharacter(${index}, this.value)"
+                               placeholder="A-Z, 0-9">
+                    </td>
+                    <td>
+                        <button type="button" class="delete-btn" onclick="removeCharacter(${index})">
+                            🗑️ Delete
+                        </button>
+                    </td>
+                `;
+                characterTableBody.appendChild(row);
+            });
+        }
+
+        function updateCharacter(index, value) {
+            if (characters[index]) {
+                characters[index].letter = value;
+                findFontsBtn.disabled = !characters.some(c => c.letter.length > 0);
+            }
+        }
+
+        function removeCharacter(index) {
+            characters.splice(index, 1);
+            updateCharacterTable();
+            findFontsBtn.disabled = characters.length === 0;
+        }
+
+        function findMatchingFonts() {
+            if (!imageData) {
+                showError('No image data available. Please upload an image first.');
+                return;
+            }
+            
+            // Filter out characters without letters
+            const validCharacters = characters.filter(c => c.letter && c.letter.length > 0);
+            
+            if (validCharacters.length === 0) {
+                showError('Please enter letters for the labeled characters.');
+                return;
+            }
+
+            // Determine which label image and bounding boxes to use based on current tab
+            const isInvertedMode = currentTab === 'inverted';
+            const labelImage = isInvertedMode ? imageData.label_image_invert : imageData.label_image;
+            const boundingBoxes = isInvertedMode ? imageData.bounding_boxes_invert : imageData.bounding_boxes;
+
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+            findFontsBtn.disabled = true;
+
+            fetch('/find_fonts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    characters: validCharacters,
+                    label_image: labelImage,
+                    bounding_boxes: boundingBoxes
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                findFontsBtn.disabled = false;
+                
+                if (data.success) {
+                    displayFontResults(data.fonts);
+                } else {
+                    showError(data.error);
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                findFontsBtn.disabled = false;
+                showError('Font matching failed: ' + error.message);
+            });
+        }
+
+        function displayFontResults(fonts) {
+            const resultsSection = document.getElementById('resultsSection');
+            const fontGrid = document.getElementById('fontGrid');
+            
+            fontGrid.innerHTML = '';
+            
+            if (fonts.length === 0) {
+                fontGrid.innerHTML = '<p>No matching fonts found.</p>';
+            } else {
+                fonts.forEach(font => {
+                    const fontCard = document.createElement('div');
+                    fontCard.className = 'font-card';
+                    
+                    fontCard.innerHTML = `
+                        <div class="font-name">${font.font}</div>
+                        <div class="font-image" style="background-image: url(${font.image_url});">
+                        </div>
+                        <div class="font-score">
+                            Similarity Score: ${font.score.toFixed(2)}
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <a href="${font.download_url}"
+                               class="btn btn-success" 
+                               style="text-decoration: none; display: inline-block; font-size: 0.9rem;"
+                               target="_blank">
+                                📥 Download Font
+                            </a>
+                        </div>
+                    `;
+                    
+                    fontGrid.appendChild(fontCard);
+                });
+            }
+            
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showError(message) {
+            removeMessages();
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(errorDiv, container.firstChild.nextSibling);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            removeMessages();
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(successDiv, container.firstChild.nextSibling);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 3000);
+        }
+
+        function removeMessages() {
+            const messages = document.querySelectorAll('.error, .success');
+            messages.forEach(msg => msg.remove());
+        }
+
+        // Add button to upload new image
+        function addNewImageButton() {
+            const newImageBtn = document.createElement('button');
+            newImageBtn.className = 'btn btn-success';
+            newImageBtn.style.margin = '20px 0';
+            newImageBtn.textContent = '📁 Upload New Image';
+            newImageBtn.onclick = () => {
+                document.getElementById('uploadSection').style.display = 'block';
+                document.getElementById('imageProcessingSection').style.display = 'none';
+                document.getElementById('resultsSection').style.display = 'none';
+                imageData = null;
+                characters = [];
+                fileInput.value = '';
+            };
+            
+            const processingSection = document.getElementById('imageProcessingSection');
+            if (processingSection && !document.getElementById('newImageBtn')) {
+                newImageBtn.id = 'newImageBtn';
+                processingSection.appendChild(newImageBtn);
+            }
+        }
+
+        // Initialize tooltips and add new image button when processing section becomes visible
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const target = mutation.target;
+                    if (target.id === 'imageProcessingSection' && target.style.display === 'grid') {
+                        addNewImageButton();
+                    }
+                }
+            });
+        });
+
+        observer.observe(document.getElementById('imageProcessingSection'), {
+            attributes: true,
+            attributeFilter: ['style']
+        });
+
+        // Initialize tooltips on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const tooltips = [
+                { element: '.processed-image', text: 'Click on individual characters to label them' },
+                { element: '.tab-button', text: 'Switch between original and inverted images' },
+                { element: '.upload-area', text: 'Drag and drop an image file or click to browse' }
+            ];
+            
+            tooltips.forEach(tooltip => {
+                const elements = document.querySelectorAll(tooltip.element);
+                elements.forEach(element => {
+                    if (element) {
+                        element.title = tooltip.text;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
